@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Airdrop Automation Bot v2.0 — Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased}
+
+:root{
+  --bg:#080d1a;--surface:#0e1629;--surface2:#121e35;
+  --border:#1a2c4a;--border2:#243d60;
+  --text:#e4eaf5;--text2:#6b85ad;--text3:#304560;
+  --accent:#4f63e7;--accent2:#10b981;
+}
+
+body{background:var(--bg);color:var(--text)}
+
+/* ── Topnav ── */
+.topnav{position:fixed;top:0;left:0;right:0;height:64px;z-index:200;background:rgba(8,13,26,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.topnav-inner{display:flex;align-items:center;height:100%;padding:0 28px;gap:0}
+.brand{display:flex;align-items:center;gap:10px;cursor:pointer;margin-right:28px;flex-shrink:0}
+.brand-mark{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px}
+.brand-name{font-weight:800;font-size:15px;letter-spacing:-.025em}
+.brand-ver{font-size:9px;color:var(--text3);font-family:'Fira Code',monospace;margin-left:5px;border:1px solid var(--border);padding:1px 5px;border-radius:4px}
+.nav-items{display:flex;align-items:center;gap:2px;flex:1}
+.nb{display:flex;align-items:center;gap:7px;padding:7px 13px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;background:none;border:none;color:var(--text2);font-family:inherit;transition:all .15s;white-space:nowrap}
+.nb:hover,.nb.on{background:var(--surface2);color:var(--text)}
+.nb.on{background:rgba(79,99,231,.12);color:var(--accent);font-weight:600}
+.nb-icon{opacity:.65;display:flex;align-items:center}
+.nb.on .nb-icon{opacity:1}
+.nbadge{margin-left:2px;background:#ef4444;color:#fff;border-radius:10px;padding:1px 6px;font-size:9px;font-weight:700}
+.thr{margin-left:auto;display:flex;gap:8px}
+.tbtn{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--surface2);border:1px solid var(--border);cursor:pointer;color:var(--text2);font-size:16px;transition:all .15s}
+.tbtn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── Pages ── */
+.main{margin-top:64px;min-height:calc(100vh - 64px)}
+.panel{padding:36px 40px;max-width:1180px;margin:0 auto;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.page{display:none}.page.on{display:block}
+
+/* ── Section header ── */
+.sec-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:16px}
+.sec-title{font-size:26px;font-weight:800;letter-spacing:-.035em;margin-bottom:4px}
+.sec-sub{font-size:13px;color:var(--text2)}
+
+/* ── Hero ── */
+.hero{display:grid;grid-template-columns:1fr 400px;gap:40px;align-items:center;padding:44px 48px;margin-bottom:28px;border-radius:20px;background:linear-gradient(135deg,#0d1635,#091228);color:#e4eaf5;overflow:hidden;position:relative;border:1px solid #1a2c4a}
+.hero-pill{display:inline-flex;align-items:center;gap:8px;font-size:11px;color:#5a7ba0;margin-bottom:16px;font-family:'Fira Code',monospace;border:1px solid #1a2c4a;background:#0d1635;padding:5px 12px;border-radius:20px}
+.dot-pulse{width:7px;height:7px;background:#10b981;border-radius:50%;box-shadow:0 0 8px #10b981;display:inline-block}
+.hero-h1{font-size:44px;font-weight:800;letter-spacing:-.045em;line-height:1.12;margin-bottom:14px}
+.grad{background:linear-gradient(90deg,#4f63e7,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-p{font-size:14px;color:#5a7ba0;line-height:1.65;max-width:360px}
+.hero-right{position:relative;display:flex;align-items:center}
+.orb{position:absolute;border-radius:50%;filter:blur(55px);pointer-events:none}
+.o1{width:200px;height:200px;background:rgba(79,99,231,.32);top:-50px;right:-30px}
+.o2{width:140px;height:140px;background:rgba(16,185,129,.25);bottom:-20px;left:10px}
+.term{position:relative;z-index:1;background:#050b18;border:1px solid #1a2c4a;border-radius:12px;padding:16px;width:100%}
+.term-dots{display:flex;gap:6px;margin-bottom:12px}
+.term-dots span{width:10px;height:10px;border-radius:50%}
+.d1{background:#ef4444!important}.d2{background:#f59e0b!important}.d3{background:#10b981!important}
+.term-code{font-family:'Fira Code',monospace;font-size:11px;color:#4ade80;line-height:1.85;white-space:pre}
+
+/* ── Metric grid ── */
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;transition:all .2s;position:relative;overflow:hidden;cursor:default}
+.metric-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--mc),transparent);opacity:0;transition:opacity .2s}
+.metric-card:hover{border-color:color-mix(in srgb,var(--mc) 40%,transparent);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.12)}
+.metric-card:hover::after{opacity:1}
+.metric-icon{margin-bottom:14px;font-size:20px}
+.metric-val{font-size:34px;font-weight:800;letter-spacing:-.045em;margin-bottom:4px;font-family:'Fira Code',monospace}
+.metric-lbl{font-size:13px;font-weight:600;margin-bottom:2px}
+.metric-sub{font-size:11px;color:var(--text3)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;margin-bottom:20px;overflow:hidden}
+.card-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-head h3{font-size:14px;font-weight:700}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+
+/* ── Table ── */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{padding:12px 18px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);background:var(--surface2)}
+.tbl td{padding:13px 18px;border-bottom:1px solid var(--border);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--surface2)}
+.mono{font-family:'Fira Code',monospace}
+
+/* ── Badge ── */
+.badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.02em}
+
+/* ── Proj grid ── */
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:20px}
+.proj-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;transition:all .2s}
+.proj-card:hover{border-color:var(--border2);box-shadow:0 4px 24px rgba(0,0,0,.1)}
+.chip{padding:3px 10px;border-radius:20px;font-size:11px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);display:inline-block}
+.social-chip{font-size:11px;padding:3px 10px;border-radius:20px;background:rgba(79,99,231,.1);color:var(--accent);border:1px solid rgba(79,99,231,.25);text-decoration:none}
+
+/* ── Ring SVG ── */
+.ring{flex-shrink:0}
+
+/* ── Buttons ── */
+.btn-p{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit;background:var(--accent);color:#fff;transition:all .15s}
+.btn-p:hover{background:#3a4fd0;box-shadow:0 4px 14px rgba(79,99,231,.45)}
+.btn-g{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;background:var(--surface);border:1px solid var(--border);color:var(--text2);transition:all .15s}
+.btn-g:hover{border-color:var(--accent);color:var(--accent);background:rgba(79,99,231,.05)}
+.btn-d{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);color:#ef4444;transition:all .15s}
+.btn-sm{padding:5px 11px!important;font-size:12px!important}
+
+/* ── Info banner ── */
+.info-banner{display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(79,99,231,.07);border:1px solid rgba(79,99,231,.18);border-radius:10px;margin-bottom:20px;font-size:13px;color:var(--accent)}
+
+/* ── Misc ── */
+.empty{text-align:center;padding:80px 20px;color:var(--text3)}
+.empty .emp-icon{font-size:48px;opacity:.2;margin-bottom:16px}
+.empty h3{font-size:16px;color:var(--text2);margin-bottom:6px;font-weight:600}
+.empty p{font-size:13px}
+.bar-wrap{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.bar-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .5s}
+
+/* Light mode */
+body.light{--bg:#eef2fb;--surface:#fff;--surface2:#f3f6ff;--border:#dde4f5;--border2:#c5d0eb;--text:#0a1628;--text2:#4a5878;--text3:#90a0bb}
+body.light .hero,.body.light .term{filter:none}
+body.light .topnav{background:rgba(255,255,255,.92)}
+body.light .term{background:#f5f7ff;border-color:#dde4f5}
+body.light .term-code{color:#4f63e7}
+
+/* Docs sidebar */
+.docs-layout{display:flex;min-height:calc(100vh - 64px)}
+.docs-sidebar{width:190px;flex-shrink:0;border-right:1px solid var(--border);padding:24px 8px;position:sticky;top:64px;align-self:flex-start;max-height:calc(100vh - 64px);overflow-y:auto}
+.docs-sidebar-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);padding:0 10px 12px}
+.docs-nav-btn{display:block;width:100%;text-align:left;padding:7px 12px;border-radius:8px;background:none;border:none;font-size:12px;font-family:inherit;cursor:pointer;color:var(--text2);margin-bottom:1px;transition:all .15s}
+.docs-nav-btn:hover{background:var(--surface2);color:var(--text)}
+.docs-nav-btn.on{background:rgba(79,99,231,.12);color:var(--accent);font-weight:600}
+.docs-content{flex:1;padding:36px 44px;max-width:750px}
+.docs-content h2{font-size:22px;font-weight:800;margin-bottom:12px;letter-spacing:-.03em}
+.docs-content h3{font-size:14px;font-weight:700;margin:22px 0 10px}
+.docs-content p{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:10px}
+.docs-content ul,.docs-content ol{padding-left:20px;font-size:13px;color:var(--text2);line-height:2;margin:10px 0}
+.dc{font-family:'Fira Code',monospace;font-size:12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;color:var(--accent);overflow-x:auto;line-height:1.75;margin:12px 0;white-space:pre}
+.call{padding:12px 16px;border-radius:8px;font-size:13px;line-height:1.65;margin:14px 0}
+.dt-wrap{overflow-x:auto;margin:12px 0;border-radius:10px;border:1px solid var(--border);overflow:hidden}
+.dt2{width:100%;border-collapse:collapse;font-size:12px}
+.dt2 th{background:var(--surface2);padding:9px 14px;text-align:left;font-weight:700;color:var(--text3);text-transform:uppercase;font-size:10px;letter-spacing:.06em}
+.dt2 td{padding:10px 14px;border-top:1px solid var(--border);color:var(--text)}
+.faq-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
+.faq-q{font-weight:600;font-size:13px;color:var(--accent);margin-bottom:6px}
+.faq-a{font-size:13px;color:var(--text2);line-height:1.6}
+
+@media(max-width:880px){
+  .hero{grid-template-columns:1fr}.hero-right{display:none}
+  .metric-grid{grid-template-columns:repeat(2,1fr)}
+  .nb span:not(.nb-icon):not(.nbadge){display:none}
+  .panel{padding:20px 16px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── Topnav ── -->
+<header class="topnav">
+  <div class="topnav-inner">
+    <div class="brand" onclick="showPage('dashboard')">
+      <div class="brand-mark">⚡</div>
+      <span class="brand-name">AirdropBot</span>
+      <span class="brand-ver">v2.0</span>
+    </div>
+    <nav class="nav-items">
+      <button class="nb on" onclick="showPage('dashboard')" id="nb-dashboard">
+        <span class="nb-icon">⊞</span><span>Dashboard</span>
+      </button>
+      <button class="nb" onclick="showPage('projects')" id="nb-projects">
+        <span class="nb-icon">🌐</span><span>Projects</span>
+      </button>
+      <button class="nb" onclick="showPage('tasks')" id="nb-tasks">
+        <span class="nb-icon">✓</span><span>Task Logs</span>
+      </button>
+      <button class="nb" onclick="showPage('wallets')" id="nb-wallets">
+        <span class="nb-icon">👛</span><span>Wallets</span>
+      </button>
+      <button class="nb" onclick="showPage('alerts')" id="nb-alerts">
+        <span class="nb-icon">🔔</span><span>Alerts</span><span class="nbadge">3</span>
+      </button>
+      <button class="nb" onclick="showPage('settings')" id="nb-settings">
+        <span class="nb-icon">⚙</span><span>Settings</span>
+      </button>
+      <button class="nb" onclick="showPage('docs')" id="nb-docs">
+        <span class="nb-icon">📖</span><span>Docs</span>
+      </button>
+    </nav>
+    <div class="thr">
+      <button class="tbtn" onclick="toggleTheme()" title="Toggle theme">☀</button>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+<!-- ══════════════════════════════════════════════════════ DASHBOARD -->
+<div class="page on" id="page-dashboard">
+<div class="panel">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-left">
+      <div class="hero-pill"><span class="dot-pulse"></span> System Online · v2.0 Production</div>
+      <h1 class="hero-h1">Track. Analyze.<br/><span class="grad">Automate.</span></h1>
+      <p class="hero-p">AI-powered airdrop farming — real scraping, live task execution, 24/7 scheduling and notifications.</p>
+    </div>
+    <div class="hero-right">
+      <div class="orb o1"></div><div class="orb o2"></div>
+      <div class="term">
+        <div class="term-dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div>
+        <pre class="term-code">$ bot run --all-active
+▶ Scanning 3 active projects…
+✓ Site health    online 124ms
+✓ Faucet check   endpoint found
+✓ Announcement   no keywords yet
+✓ Eligibility    testing…
+✓ Tasks done     6/6 success</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Metrics -->
+  <div class="metric-grid">
+    <div class="metric-card" style="--mc:#4f63e7">
+      <div class="metric-icon" style="color:#4f63e7">🌐</div>
+      <div class="metric-val" style="color:var(--text)">3</div>
+      <div class="metric-lbl">Active Projects</div>
+      <div class="metric-sub">5 total tracked</div>
+    </div>
+    <div class="metric-card" style="--mc:#10b981">
+      <div class="metric-icon" style="color:#10b981">📊</div>
+      <div class="metric-val" style="color:var(--text)">142</div>
+      <div class="metric-lbl">Tasks Executed</div>
+      <div class="metric-sub">91.5% success rate</div>
+    </div>
+    <div class="metric-card" style="--mc:#0ea5e9">
+      <div class="metric-icon" style="color:#0ea5e9">👛</div>
+      <div class="metric-val" style="color:var(--text)">4</div>
+      <div class="metric-lbl">Wallets Tracked</div>
+      <div class="metric-sub">public addresses only</div>
+    </div>
+    <div class="metric-card" style="--mc:#f59e0b">
+      <div class="metric-icon" style="color:#f59e0b">🔔</div>
+      <div class="metric-val" style="color:var(--text)">3</div>
+      <div class="metric-lbl">Unread Alerts</div>
+      <div class="metric-sub">from bot runs</div>
+    </div>
+  </div>
+
+  <!-- Recent activity -->
+  <div class="card">
+    <div class="card-head"><h3>Recent Activity</h3></div>
+    <table class="tbl">
+      <thead><tr><th>Task</th><th>Project</th><th>Status</th><th>Time</th></tr></thead>
+      <tbody>
+        <tr><td>Site Health Check</td><td>LayerZero</td><td><span class="badge" style="background:#10b98118;color:#10b981;border:1px solid #10b98130">success</span></td><td class="mono" style="font-size:11px;color:var(--text3)">2026-05-20 14:32</td></tr>
+        <tr><td>Faucet Request</td><td>Arbitrum Nova</td><td><span class="badge" style="background:#10b98118;color:#10b981;border:1px solid #10b98130">success</span></td><td class="mono" style="font-size:11px;color:var(--text3)">2026-05-20 14:31</td></tr>
+        <tr><td>Social Discovery</td><td>zkSync Era</td><td><span class="badge" style="background:#10b98118;color:#10b981;border:1px solid #10b98130">success</span></td><td class="mono" style="font-size:11px;color:var(--text3)">2026-05-20 14:30</td></tr>
+        <tr><td>On-chain Swap</td><td>LayerZero</td><td><span class="badge" style="background:#f59e0b18;color:#f59e0b;border:1px solid #f59e0b30">manual</span></td><td class="mono" style="font-size:11px;color:var(--text3)">2026-05-20 14:29</td></tr>
+        <tr><td>Eligibility Check</td><td>Starknet</td><td><span class="badge" style="background:#64748b18;color:#64748b;border:1px solid #64748b30">skipped</span></td><td class="mono" style="font-size:11px;color:var(--text3)">2026-05-20 14:28</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Breakdowns -->
+  <div class="two-col">
+    <div class="card">
+      <div class="card-head"><h3>Project Types</h3></div>
+      <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:10px"><span class="badge" style="background:#4f63e718;color:#4f63e7;border:1px solid #4f63e730">testnet</span><div class="bar-wrap"><div class="bar-fill" style="width:60%"></div></div><span class="mono" style="font-size:11px;color:var(--text3)">3</span></div>
+        <div style="display:flex;align-items:center;gap:10px"><span class="badge" style="background:#0ea5e918;color:#0ea5e9;border:1px solid #0ea5e930">points</span><div class="bar-wrap"><div class="bar-fill" style="width:40%"></div></div><span class="mono" style="font-size:11px;color:var(--text3)">2</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Chains</h3></div>
+      <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:10px"><span class="badge" style="background:#4f63e718;color:#4f63e7;border:1px solid #4f63e730">ethereum</span><div class="bar-wrap"><div class="bar-fill" style="width:40%;background:var(--accent2)"></div></div><span class="mono" style="font-size:11px;color:var(--text3)">2</span></div>
+        <div style="display:flex;align-items:center;gap:10px"><span class="badge" style="background:#0ea5e918;color:#0ea5e9;border:1px solid #0ea5e930">arbitrum</span><div class="bar-wrap"><div class="bar-fill" style="width:60%;background:var(--accent2)"></div></div><span class="mono" style="font-size:11px;color:var(--text3)">3</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ PROJECTS -->
+<div class="page" id="page-projects">
+<div class="panel">
+  <div class="sec-head">
+    <div><h2 class="sec-title">Projects</h2><p class="sec-sub">5 projects tracked — add URL to auto-generate tasks via AI</p></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-g">↻ Refresh</button>
+      <button class="btn-p">+ Add Project</button>
+    </div>
+  </div>
+  <div class="proj-grid">
+    <!-- Card 1 -->
+    <div class="proj-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div>
+          <div style="font-weight:700;font-size:16px;margin-bottom:8px">LayerZero</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <span class="badge" style="background:#0ea5e918;color:#0ea5e9;border:1px solid #0ea5e930">bridge</span>
+            <span class="badge" style="background:#4f63e718;color:#4f63e7;border:1px solid #4f63e730">ethereum</span>
+            <span class="badge" style="background:#10b98118;color:#10b981;border:1px solid #10b98130">active</span>
+          </div>
+        </div>
+        <svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="22" fill="none" stroke="currentColor" stroke-opacity=".1" stroke-width="4"/><circle cx="28" cy="28" r="22" fill="none" stroke="#10b981" stroke-width="4" stroke-dasharray="118 138" stroke-linecap="round" transform="rotate(-90 28 28)"/><text x="28" y="33" text-anchor="middle" font-size="12" font-weight="700" fill="#10b981">85</text></svg>
+      </div>
+      <p style="font-size:12px;color:var(--text2);line-height:1.65;margin-bottom:12px">Omnichain interoperability protocol. High airdrop potential — cross-chain bridge activity required across 5+ chains.</p>
+      <div style="font-size:11px;color:var(--text3);display:flex;align-items:center;gap:6px;margin-bottom:12px">🔗 <a href="#" style="color:var(--accent);text-decoration:none">https://layerzero.network</a></div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+        <span class="chip">Bridge Tokens</span><span class="chip">Use Stargate</span><span class="chip">Multi-chain TX</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <span class="social-chip">twitter</span><span class="social-chip">discord</span>
+      </div>
+      <div class="mono" style="font-size:10px;color:var(--text3);margin-bottom:12px">Last run: 2026-05-20 14:32:11</div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border)">
+        <button class="btn-p btn-sm">▶ Run Bot</button>
+        <button class="btn-g btn-sm">⏸ Pause</button>
+        <button class="btn-g btn-sm">↻ Re-analyze</button>
+        <button class="btn-d btn-sm">🗑</button>
+      </div>
+    </div>
+    <!-- Card 2 -->
+    <div class="proj-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div>
+          <div style="font-weight:700;font-size:16px;margin-bottom:8px">Arbitrum Nova</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <span class="badge" style="background:#4f63e718;color:#4f63e7;border:1px solid #4f63e730">testnet</span>
+            <span class="badge" style="background:#0ea5e918;color:#0ea5e9;border:1px solid #0ea5e930">arbitrum</span>
+            <span class="badge" style="background:#10b98118;color:#10b981;border:1px solid #10b98130">active</span>
+          </div>
+        </div>
+        <svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="22" fill="none" stroke="currentColor" stroke-opacity=".1" stroke-width="4"/><circle cx="28" cy="28" r="22" fill="none" stroke="#f59e0b" stroke-width="4" stroke-dasharray="83 138" stroke-linecap="round" transform="rotate(-90 28 28)"/><text x="28" y="33" text-anchor="middle" font-size="12" font-weight="700" fill="#f59e0b">60</text></svg>
+      </div>
+      <p style="font-size:12px;color:var(--text2);line-height:1.65;margin-bottom:12px">Testnet with active faucet. Daily transactions and contract interactions boost eligibility score significantly.</p>
+      <div style="font-size:11px;color:var(--text3);display:flex;align-items:center;gap:6px;margin-bottom:12px">🔗 <a href="#" style="color:var(--accent);text-decoration:none">https://nova.arbitrum.io</a></div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+        <span class="chip">Claim Faucet</span><span class="chip">Test Swap</span><span class="chip">Daily Check-in</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <span class="social-chip">twitter</span><span class="social-chip">discord</span><span class="social-chip">telegram</span>
+      </div>
+      <div class="mono" style="font-size:10px;color:var(--text3);margin-bottom:12px">Last run: 2026-05-20 13:10:44</div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border)">
+        <button class="btn-p btn-sm">▶ Run Bot</button>
+        <button class="btn-g btn-sm">⏸ Pause</button>
+        <button class="btn-g btn-sm">↻ Re-analyze</button>
+        <button class="btn-d btn-sm">🗑</button>
+      </div>
+    </div>
+    <!-- Card 3 paused -->
+    <div class="proj-card" style="opacity:.65">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div>
+          <div style="font-weight:700;font-size:16px;margin-bottom:8px">zkSync Era</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <span class="badge" style="background:#0ea5e918;color:#0ea5e9;border:1px solid #0ea5e930">points</span>
+            <span class="badge" style="background:#4f63e718;color:#4f63e7;border:1px solid #4f63e730">ethereum</span>
+            <span class="badge" style="background:#f59e0b18;color:#f59e0b;border:1px solid #f59e0b30">paused</span>
+          </div>
+        </div>
+        <svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="22" fill="none" stroke="currentColor" stroke-opacity=".1" stroke-width="4"/><circle cx="28" cy="28" r="22" fill="none" stroke="#10b981" stroke-width="4" stroke-dasharray="124 138" stroke-linecap="round" transform="rotate(-90 28 28)"/><text x="28" y="33" text-anchor="middle" font-size="12" font-weight="700" fill="#10b981">90</text></svg>
+      </div>
+      <p style="font-size:12px;color:var(--text2);line-height:1.65;margin-bottom:12px">Points system with weekly leaderboard. Very high airdrop potential based on TVL and investor backing.</p>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border)">
+        <button class="btn-p btn-sm">▶ Resume</button>
+        <button class="btn-g btn-sm">↻ Re-analyze</button>
+        <button class="btn-d btn-sm">🗑</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ TASKS -->
+<div class="page" id="page-tasks">
+<div class="panel">
+  <div class="sec-head">
+    <div><h2 class="sec-title">Task Logs</h2><p class="sec-sub">142 execution records</p></div>
+    <button class="btn-g">↻ Refresh</button>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
+    <button style="padding:6px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:#fff;font-family:inherit">all</button>
+    <button style="padding:6px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:inherit">success</button>
+    <button style="padding:6px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:inherit">failed</button>
+    <button style="padding:6px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:inherit">manual</button>
+    <button style="padding:6px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:inherit">skipped</button>
+  </div>
+  <div class="card">
+    <table class="tbl">
+      <thead><tr><th>#</th><th>Task</th><th>Project</th><th>Status</th><th>Result</th><th>Wallet</th><th>Time</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--text3);font-size:11px">142</td><td style="font-weight:500">Site Health Check</td><td>LayerZero</td><td><span class="badge" style="background:#10b98118;color:#10b981;border:1px solid #10b98130">success</span></td><td style="font-size:12px;color:var(--text2)">Online ✓ (124ms)</td><td class="mono" style="font-size:11px;color:var(--text2)">0xA1b2…</td><td class="mono" style="font-size:11px;color:var(--text3)">2026-05-20 14:32</td></tr>
+        <tr><td style="color:var(--text3);font-size:11px">141</td><td style="font-weight:500">Faucet Request</td><td>Arbitrum Nova</td><td><span class="badge" style="background:#10b98118;color:#10b981;border:1px solid #10b98130">success</span></td><td style="font-size:12px;color:var(--text2)">Faucet request sent (200)</td><td class="mono" style="font-size:11px;color:var(--text2)">0xA1b2…</td><td class="mono" style="font-size:11px;color:var(--text3)">2026-05-20 14:31</td></tr>
+        <tr><td style="color:var(--text3);font-size:11px">140</td><td style="font-weight:500">On-chain Swap</td><td>LayerZero</td><td><span class="badge" style="background:#f59e0b18;color:#f59e0b;border:1px solid #f59e0b30">manual</span></td><td style="font-size:12px;color:var(--text2)">Requires wallet signing</td><td class="mono" style="font-size:11px;color:var(--text2)">0xA1b2…</td><td class="mono" style="font-size:11px;color:var(--text3)">2026-05-20 14:30</td></tr>
+        <tr><td style="color:var(--text3);font-size:11px">139</td><td style="font-weight:500">Announcement Scan</td><td>zkSync Era</td><td><span class="badge" style="background:#10b98118;color:#10b981;border:1px solid #10b98130">success</span></td><td style="font-size:12px;color:var(--text2)">No airdrop keywords</td><td class="mono" style="font-size:11px;color:var(--text2)">—</td><td class="mono" style="font-size:11px;color:var(--text3)">2026-05-20 13:00</td></tr>
+        <tr><td style="color:var(--text3);font-size:11px">138</td><td style="font-weight:500">Eligibility Check</td><td>Starknet</td><td><span class="badge" style="background:#64748b18;color:#64748b;border:1px solid #64748b30">skipped</span></td><td style="font-size:12px;color:var(--text2)">No endpoint found</td><td class="mono" style="font-size:11px;color:var(--text2)">0xA1b2…</td><td class="mono" style="font-size:11px;color:var(--text3)">2026-05-20 12:00</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ WALLETS -->
+<div class="page" id="page-wallets">
+<div class="panel">
+  <div class="sec-head">
+    <div><h2 class="sec-title">Wallets</h2><p class="sec-sub">Public addresses only — private keys never stored</p></div>
+    <button class="btn-p">+ Add Wallet</button>
+  </div>
+  <div class="info-banner">🛡 Only public wallet addresses are stored. All on-chain transactions require manual approval.</div>
+  <div class="card">
+    <table class="tbl">
+      <thead><tr><th>Label</th><th>Address</th><th>Chain</th><th>Added</th><th></th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:500">Main Wallet</td><td class="mono" style="font-size:12px">0xA1b2c3d4e5f6789012345678901234567890AbCd</td><td><span class="badge" style="background:#4f63e718;color:#4f63e7;border:1px solid #4f63e730">ethereum</span></td><td class="mono" style="font-size:11px;color:var(--text3)">2026-05-15 09:00</td><td><button class="btn-d btn-sm">🗑</button></td></tr>
+        <tr><td style="font-weight:500">Arb Wallet</td><td class="mono" style="font-size:12px">0xB9c8d7e6f5432109876543210987654321bCdEf</td><td><span class="badge" style="background:#0ea5e918;color:#0ea5e9;border:1px solid #0ea5e930">arbitrum</span></td><td class="mono" style="font-size:11px;color:var(--text3)">2026-05-16 11:00</td><td><button class="btn-d btn-sm">🗑</button></td></tr>
+        <tr><td style="font-weight:500">Sol Wallet</td><td class="mono" style="font-size:12px">7xKp3mNqRsTuVwXyZaBcDeFgHiJkLmNoPqRsTuVwXy</td><td><span class="badge" style="background:#8b5cf618;color:#8b5cf6;border:1px solid #8b5cf630">solana</span></td><td class="mono" style="font-size:11px;color:var(--text3)">2026-05-17 14:00</td><td><button class="btn-d btn-sm">🗑</button></td></tr>
+        <tr><td style="font-weight:500">Base Wallet</td><td class="mono" style="font-size:12px">0xC3d4e5f6789012345678901234567890AbCdEf01</td><td><span class="badge" style="background:#0ea5e918;color:#0ea5e9;border:1px solid #0ea5e930">base</span></td><td class="mono" style="font-size:11px;color:var(--text3)">2026-05-18 08:00</td><td><button class="btn-d btn-sm">🗑</button></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ ALERTS -->
+<div class="page" id="page-alerts">
+<div class="panel">
+  <div class="sec-head">
+    <div><h2 class="sec-title">Alerts</h2><p class="sec-sub">3 unread notifications</p></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-g">✓ Mark Read</button>
+      <button class="btn-d">🗑 Clear All</button>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;gap:14px;padding:14px 18px;border-radius:12px;background:var(--surface);border:1px solid var(--border);border-left:3px solid #f59e0b">
+      <div style="width:8px;height:8px;border-radius:50%;background:#f59e0b;margin-top:5px;flex-shrink:0"></div>
+      <div style="flex:1"><div style="font-weight:600;font-size:13px;margin-bottom:4px">🚨 Alert: zkSync Era</div><div style="font-size:12px;color:var(--text2);margin-bottom:6px">Airdrop keywords detected: "claim", "eligible", "snapshot"</div><div class="mono" style="font-size:10px;color:var(--text3)">2026-05-20 14:00:00</div></div>
+      <div style="width:8px;height:8px;background:var(--accent);border-radius:50%;margin-top:5px;flex-shrink:0"></div>
+    </div>
+    <div style="display:flex;gap:14px;padding:14px 18px;border-radius:12px;background:var(--surface);border:1px solid var(--border);border-left:3px solid #10b981">
+      <div style="width:8px;height:8px;border-radius:50%;background:#10b981;margin-top:5px;flex-shrink:0"></div>
+      <div style="flex:1"><div style="font-weight:600;font-size:13px;margin-bottom:4px">✅ Bot Run: LayerZero</div><div style="font-size:12px;color:var(--text2);margin-bottom:6px">6 tasks completed successfully</div><div class="mono" style="font-size:10px;color:var(--text3)">2026-05-20 13:32:00</div></div>
+      <div style="width:8px;height:8px;background:var(--accent);border-radius:50%;margin-top:5px;flex-shrink:0"></div>
+    </div>
+    <div style="display:flex;gap:14px;padding:14px 18px;border-radius:12px;background:var(--surface);border:1px solid var(--border);border-left:3px solid #4f63e7;opacity:.7">
+      <div style="width:8px;height:8px;border-radius:50%;background:#4f63e7;margin-top:5px;flex-shrink:0"></div>
+      <div style="flex:1"><div style="font-weight:600;font-size:13px;margin-bottom:4px">ℹ️ Project Analyzed: Starknet</div><div style="font-size:12px;color:var(--text2);margin-bottom:6px">Type: testnet | Chain: ethereum | Score: 78/100</div><div class="mono" style="font-size:10px;color:var(--text3)">2026-05-20 10:15:00</div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ SETTINGS -->
+<div class="page" id="page-settings">
+<div class="panel">
+  <div class="sec-head">
+    <div><h2 class="sec-title">Settings</h2><p class="sec-sub">Keys, notifications, and automation config</p></div>
+    <button class="btn-p">✓ Save All</button>
+  </div>
+  <!-- AI -->
+  <div class="card" style="padding:24px;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+      <span style="color:var(--accent)">🤖</span><h3 style="font-size:14px;font-weight:700">AI Analysis</h3>
+    </div>
+    <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Anthropic API Key</label>
+    <input type="password" placeholder="sk-ant-…" style="width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:inherit;outline:none"/>
+    <p style="font-size:11px;color:var(--text3);margin-top:6px">Get yours at console.anthropic.com</p>
+  </div>
+  <!-- Telegram -->
+  <div class="card" style="padding:24px;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+      <span style="color:var(--accent)">✈</span><h3 style="font-size:14px;font-weight:700">Telegram Notifications</h3>
+    </div>
+    <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px">
+      <div><label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Bot Token</label><input type="password" placeholder="123456:ABC…" style="width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:inherit;outline:none"/></div>
+      <div><label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Chat ID</label><input placeholder="-100123…" style="width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:inherit;outline:none"/></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" style="accent-color:var(--accent)"/> Enable Telegram</label>
+      <button class="btn-g btn-sm">✈ Test</button>
+    </div>
+  </div>
+  <!-- Scheduler -->
+  <div class="card" style="padding:24px;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+      <span style="color:var(--accent)">⏱</span><h3 style="font-size:14px;font-weight:700">Scheduler</h3>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px">
+      <div><label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Auto-Run Interval (hours)</label><input type="number" value="24" style="width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:inherit;outline:none"/></div>
+      <div><label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Announcement Check (min)</label><input type="number" value="60" style="width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:inherit;outline:none"/></div>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--accent)"/> Enable Background Scheduler</label>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ DOCS -->
+<div class="page" id="page-docs">
+<div class="docs-layout">
+  <div class="docs-sidebar">
+    <div class="docs-sidebar-title">Documentation</div>
+    <button class="docs-nav-btn on" onclick="showDoc(this,'doc-overview')">Overview</button>
+    <button class="docs-nav-btn" onclick="showDoc(this,'doc-quickstart')">Quick Start</button>
+    <button class="docs-nav-btn" onclick="showDoc(this,'doc-install')">Installation</button>
+    <button class="docs-nav-btn" onclick="showDoc(this,'doc-config')">Configuration</button>
+    <button class="docs-nav-btn" onclick="showDoc(this,'doc-projects')">Projects</button>
+    <button class="docs-nav-btn" onclick="showDoc(this,'doc-taskbot')">Task Bot</button>
+    <button class="docs-nav-btn" onclick="showDoc(this,'doc-wallets')">Wallets</button>
+    <button class="docs-nav-btn" onclick="showDoc(this,'doc-production')">Going Live</button>
+    <button class="docs-nav-btn" onclick="showDoc(this,'doc-deploy')">Deployment</button>
+    <button class="docs-nav-btn" onclick="showDoc(this,'doc-notifications')">Notifications</button>
+    <button class="docs-nav-btn" onclick="showDoc(this,'doc-api')">API Reference</button>
+    <button class="docs-nav-btn" onclick="showDoc(this,'doc-faq')">FAQ</button>
+    <button class="docs-nav-btn" onclick="showDoc(this,'doc-rules')">Rules & Ethics</button>
+    <button class="docs-nav-btn" onclick="showDoc(this,'doc-community')">Community</button>
+  </div>
+  <div class="docs-content">
+
+    <div class="doc-page on" id="doc-overview">
+      <h2>Airdrop Automation Bot v2.0</h2>
+      <p>Track, analyze, and automate airdrop-eligible tasks across crypto projects. Powered by Claude AI, real web scraping, APScheduler, and Telegram/Discord alerts.</p>
+      <div class="call" style="background:rgba(79,99,231,.1);border:1px solid rgba(79,99,231,.22);color:#93a8f5">Philosophy: 3–5 wallets with genuine activity beats thousands of flagged bot wallets. This tool keeps you organized, early, and consistent.</div>
+      <h3>Architecture</h3>
+      <pre class="dc">React 18 (Vite) ──► Flask REST API (:5050)
+                          │
+              ┌───────────┴────────────┐
+         SQLite DB            Claude AI Analysis
+                          │
+              APScheduler (24h auto-run)
+                          │
+         Telegram / Discord notifications</pre>
+    </div>
+
+    <div class="doc-page" id="doc-quickstart">
+      <h2>Quick Start</h2>
+      <ol><li><strong>Step 1:</strong> Extract the ZIP to any folder</li><li><strong>Step 2:</strong> Copy backend/.env.example → .env and add API keys</li><li><strong>Step 3:</strong> Windows: double-click start.bat | Mac/Linux: ./start.sh</li><li><strong>Step 4:</strong> Open http://localhost:3000</li><li><strong>Step 5:</strong> Settings → enter Anthropic API key</li><li><strong>Step 6:</strong> Projects → Add Project → paste any crypto project URL</li></ol>
+      <div class="call" style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.22);color:#6ee7b7;margin-top:14px">Works without an API key using rule-based fallback. Add your Anthropic key for AI-powered task generation.</div>
+    </div>
+
+    <div class="doc-page" id="doc-install">
+      <h2>Manual Installation</h2>
+      <h3>Backend</h3>
+      <pre class="dc">cd backend
+python -m venv venv
+source venv/bin/activate   # Mac/Linux
+venv\Scripts\activate.bat  # Windows
+pip install -r requirements.txt
+cp .env.example .env
+python app.py</pre>
+      <h3>Frontend</h3>
+      <pre class="dc">cd frontend
+npm install
+npm run dev</pre>
+      <p>Frontend → <strong>http://localhost:3000</strong> · Backend → <strong>http://localhost:5050</strong></p>
+    </div>
+
+    <div class="doc-page" id="doc-config">
+      <h2>Configuration</h2>
+      <div class="dt-wrap"><table class="dt2"><thead><tr><th>Variable</th><th>Description</th><th>Default</th></tr></thead><tbody>
+        <tr><td>ANTHROPIC_API_KEY</td><td>Claude AI for analysis</td><td>empty</td></tr>
+        <tr><td>TELEGRAM_BOT_TOKEN</td><td>BotFather token</td><td>empty</td></tr>
+        <tr><td>TELEGRAM_CHAT_ID</td><td>Your chat/group ID</td><td>empty</td></tr>
+        <tr><td>DISCORD_WEBHOOK</td><td>Discord webhook URL</td><td>empty</td></tr>
+        <tr><td>ENABLE_SCHEDULER</td><td>Background auto-run</td><td>true</td></tr>
+        <tr><td>AUTO_RUN_INTERVAL_HOURS</td><td>Auto-run frequency</td><td>24</td></tr>
+        <tr><td>PORT</td><td>Backend port</td><td>5050</td></tr>
+      </tbody></table></div>
+    </div>
+
+    <div class="doc-page" id="doc-projects">
+      <h2>Projects</h2>
+      <p>Projects are the core unit. Each represents a crypto protocol to farm. Add a URL and the bot scrapes + analyzes it automatically via Claude AI.</p>
+      <h3>Project Types</h3>
+      <div class="dt-wrap"><table class="dt2"><thead><tr><th>Type</th><th>Description</th><th>Auto Tasks</th></tr></thead><tbody>
+        <tr><td>testnet</td><td>Test network with faucet</td><td>Faucet claim, test swaps</td></tr>
+        <tr><td>points</td><td>XP/points leaderboard</td><td>Daily check-in</td></tr>
+        <tr><td>swap</td><td>DEX/AMM protocol</td><td>Swap tracking</td></tr>
+        <tr><td>bridge</td><td>Cross-chain bridge</td><td>Bridge activity log</td></tr>
+        <tr><td>nft</td><td>NFT minting</td><td>Mint detection</td></tr>
+        <tr><td>governance</td><td>DAO voting</td><td>Proposal monitoring</td></tr>
+      </tbody></table></div>
+    </div>
+
+    <div class="doc-page" id="doc-taskbot">
+      <h2>Task Bot</h2>
+      <div class="dt-wrap"><table class="dt2"><thead><tr><th>Task</th><th>Mode</th><th>Notes</th></tr></thead><tbody>
+        <tr><td>Site Health Check</td><td>✅ Auto</td><td>Uptime + latency</td></tr>
+        <tr><td>Faucet Request</td><td>✅ Auto</td><td>POSTs wallet to endpoint</td></tr>
+        <tr><td>Social Discovery</td><td>✅ Auto</td><td>Twitter, Discord, Telegram</td></tr>
+        <tr><td>Announcement Scan</td><td>✅ Auto</td><td>Every 60 min</td></tr>
+        <tr><td>Eligibility Check</td><td>✅ Auto</td><td>/eligibility API patterns</td></tr>
+        <tr><td>On-chain Swaps</td><td>❌ Manual</td><td>Requires wallet signing</td></tr>
+        <tr><td>Governance Vote</td><td>❌ Manual</td><td>Opens page in browser</td></tr>
+      </tbody></table></div>
+    </div>
+
+    <div class="doc-page" id="doc-wallets">
+      <h2>Wallets</h2>
+      <div class="call" style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);color:#fbbf24">Only public wallet addresses are ever stored. Private keys are never required, stored, or transmitted.</div>
+      <h3>Best Practices</h3>
+      <ul><li>3–5 wallets with genuine on-chain history</li><li>Different seed phrases, stored securely offline</li><li>Fund each with small real amounts for gas</li><li>Separate browser profiles per wallet</li><li>Avoid bulk creation — Sybil detection is advanced in 2026</li></ul>
+    </div>
+
+    <div class="doc-page" id="doc-production">
+      <h2>Going Live</h2>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;gap:14px;align-items:flex-start"><div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">1</div><div><strong style="display:block;margin-bottom:3px;font-size:13px">Add Anthropic API Key</strong><p>Settings → AI Analysis → paste sk-ant-… key</p></div></div>
+        <div style="display:flex;gap:14px;align-items:flex-start"><div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">2</div><div><strong style="display:block;margin-bottom:3px;font-size:13px">Configure Notifications</strong><p>Add Telegram token + Discord webhook, click Test</p></div></div>
+        <div style="display:flex;gap:14px;align-items:flex-start"><div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">3</div><div><strong style="display:block;margin-bottom:3px;font-size:13px">Enable Scheduler</strong><p>Settings → Scheduler → Enable Background Scheduler</p></div></div>
+        <div style="display:flex;gap:14px;align-items:flex-start"><div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">4</div><div><strong style="display:block;margin-bottom:3px;font-size:13px">Deploy Online</strong><p>Railway (backend) + Vercel (frontend) for 24/7 operation</p></div></div>
+      </div>
+    </div>
+
+    <div class="doc-page" id="doc-deploy">
+      <h2>Cloud Deployment</h2>
+      <h3>Railway + Vercel (Free)</h3>
+      <pre class="dc">npm install -g @railway/cli
+cd backend && railway init && railway up
+railway variables set ANTHROPIC_API_KEY=sk-ant-...
+
+cd frontend && npm run build && vercel --prod</pre>
+      <h3>VPS (~$5/month)</h3>
+      <pre class="dc">pm2 start "python app.py" --name airdrop-bot
+pm2 save && pm2 startup</pre>
+    </div>
+
+    <div class="doc-page" id="doc-notifications">
+      <h2>Notifications</h2>
+      <h3>Telegram Setup</h3>
+      <ol><li>Telegram → @BotFather → /newbot</li><li>Copy token (123456:ABC-DEF…)</li><li>Visit https://api.telegram.org/bot{TOKEN}/getUpdates</li><li>Copy chat_id from response</li><li>Settings → Telegram → Test</li></ol>
+      <h3>Discord Setup</h3>
+      <ol><li>Server Settings → Integrations → Webhooks → New Webhook</li><li>Choose channel → Copy URL → Settings → Discord → Test</li></ol>
+    </div>
+
+    <div class="doc-page" id="doc-api">
+      <h2>API Reference</h2>
+      <p>Base: <code style="font-family:'Fira Code';background:var(--surface2);padding:2px 8px;border-radius:4px;color:var(--accent)">http://localhost:5050</code></p>
+      <div class="dt-wrap"><table class="dt2"><thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead><tbody>
+        <tr><td>GET</td><td>/api/health</td><td>Status + scheduler state</td></tr>
+        <tr><td>GET</td><td>/api/projects</td><td>All projects with tasks</td></tr>
+        <tr><td>POST</td><td>/api/projects</td><td>Add: {name, url}</td></tr>
+        <tr><td>DELETE</td><td>/api/projects/:id</td><td>Delete project</td></tr>
+        <tr><td>POST</td><td>/api/tasks/run/:id</td><td>Run bot for project</td></tr>
+        <tr><td>GET</td><td>/api/tasks</td><td>Task logs</td></tr>
+        <tr><td>GET</td><td>/api/wallets</td><td>List wallets</td></tr>
+        <tr><td>GET</td><td>/api/notifications</td><td>Alerts + unread count</td></tr>
+        <tr><td>GET/POST</td><td>/api/settings</td><td>Get/save settings</td></tr>
+        <tr><td>GET</td><td>/api/stats</td><td>Dashboard metrics</td></tr>
+      </tbody></table></div>
+    </div>
+
+    <div class="doc-page" id="doc-faq">
+      <h2>FAQ</h2>
+      <div class="faq-item"><div class="faq-q">Is this safe?</div><div class="faq-a">Yes. Public addresses only. No on-chain actions automated. All signing is manual.</div></div>
+      <div class="faq-item"><div class="faq-q">Will I get flagged?</div><div class="faq-a">No — the bot tracks and reminds. You execute swaps manually. Genuine activity is the goal.</div></div>
+      <div class="faq-item"><div class="faq-q">Do I need an Anthropic key?</div><div class="faq-a">No. Rule-based fallback works without it. With it, task generation is far more accurate.</div></div>
+      <div class="faq-item"><div class="faq-q">How many wallets?</div><div class="faq-a">3–5 with genuine activity. Mass wallet farming is heavily penalized in 2026.</div></div>
+      <div class="faq-item"><div class="faq-q">Where is data stored?</div><div class="faq-a">Locally in data/projects.db (SQLite). Nothing leaves your machine except optional Anthropic API calls.</div></div>
+      <div class="faq-item"><div class="faq-q">Backend won't start?</div><div class="faq-a">Check Python 3.9+, venv active, requirements installed, port 5050 free.</div></div>
+    </div>
+
+    <div class="doc-page" id="doc-rules">
+      <h2>Rules & Ethics</h2>
+      <div class="call" style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);color:#fbbf24">This bot helps you stay organized and consistent — not to cheat or exploit protocols.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+        <div style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.18);border-radius:10px;padding:16px"><div style="font-weight:700;margin-bottom:10px;color:var(--accent2)">✅ What it does</div><div style="font-size:12px;color:var(--text2);line-height:2">Tracks projects &amp; tasks<br/>Checks faucet endpoints<br/>Discovers social links<br/>Monitors announcements<br/>Logs activity history<br/>Sends alerts when needed</div></div>
+        <div style="background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.18);border-radius:10px;padding:16px"><div style="font-weight:700;margin-bottom:10px;color:#ef4444">❌ What it does NOT</div><div style="font-size:12px;color:var(--text2);line-height:2">Execute on-chain transactions<br/>Store private keys<br/>Create Sybil wallets<br/>Automate DEX swaps<br/>Bypass protocol ToS</div></div>
+      </div>
+      <p style="font-size:13px;color:var(--text3);margin-top:16px">MIT License — Made by Aditya GFX</p>
+    </div>
+
+    <div class="doc-page" id="doc-community">
+      <h2>Community</h2>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
+        <a href="https://discord.gg/airdropbot" target="_blank" style="display:flex;gap:14px;padding:16px;border-radius:12px;background:var(--surface);border:1px solid var(--border);text-decoration:none"><span style="font-size:24px">💬</span><div><strong style="display:block;color:var(--text);font-size:13px">Discord Server</strong><p>Strategy, project alerts, and bot support</p></div></a>
+        <a href="https://x.com/AirdropBotApp" target="_blank" style="display:flex;gap:14px;padding:16px;border-radius:12px;background:var(--surface);border:1px solid var(--border);text-decoration:none"><span style="font-size:24px">🐦</span><div><strong style="display:block;color:var(--text);font-size:13px">X / Twitter</strong><p>@AirdropBotApp — updates and airdrop announcements</p></div></a>
+      </div>
+      <h3>Alpha Sources</h3>
+      <ul><li><strong>DeFiLlama</strong> — Track TVL and new protocols</li><li><strong>Layer3.xyz</strong> — Curated task-based campaigns</li><li><strong>Earni.fi</strong> — Airdrop eligibility tracker</li><li><strong>Bankless</strong> — Weekly high-potential research</li></ul>
+    </div>
+
+  </div>
+</div>
+</div>
+
+</main>
+
+<script>
+// ── Page routing ──
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
+  document.getElementById('page-' + id).classList.add('on');
+  document.getElementById('nb-' + id).classList.add('on');
+}
+
+// ── Docs routing ──
+function showDoc(btn, id) {
+  document.querySelectorAll('.doc-page').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.docs-nav-btn').forEach(b => b.classList.remove('on'));
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'block';
+  btn.classList.add('on');
+}
+
+// Init doc pages
+document.querySelectorAll('.doc-page').forEach((p, i) => {
+  if (i > 0) p.style.display = 'none';
+});
+
+// ── Theme toggle ──
+let dark = true;
+function toggleTheme() {
+  dark = !dark;
+  document.body.classList.toggle('light', !dark);
+  document.querySelector('.tbtn').textContent = dark ? '☀' : '🌙';
+}
+</script>
+</body>
+</html>

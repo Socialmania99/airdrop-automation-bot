@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend:
+    name: Backend — Python checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Check syntax (py compile)
+        run: |
+          cd backend
+          python -m py_compile app.py analyzer.py task_engine.py notifier.py db.py
+          echo "✅ All Python files compile cleanly"
+
+      - name: Verify imports
+        run: |
+          cd backend
+          python -c "import flask, requests, bs4, apscheduler; print('✅ All dependencies importable')"
+
+  frontend:
+    name: Frontend — Node checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build check
+        run: |
+          cd frontend
+          npm run build
+          echo "✅ Frontend builds cleanly"
