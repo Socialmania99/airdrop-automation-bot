@@ -254,7 +254,7 @@ Please read [CONTRIBUTING.md](./CONTRIBUTING.md) before submitting.
 
 ## 📄 License
 
-MIT © [Aditya GFX](https://github.com/AdityaGFX)
+MIT © [Aditya GFX](https://github.com/Socialmania99)
 
 ---
 
