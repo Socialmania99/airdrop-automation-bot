@@ -258,4 +258,4 @@ MIT © [Socialmania99](https://github.com/Socialmania99)
 
 ---
 
-<div align="center">Made with ⚡ by Aditya GFX · Star ⭐ if useful!</div>
+<div align="center">Made with ⚡ by Socialmania99 · Star ⭐ if useful!</div>
